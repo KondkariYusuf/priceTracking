@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <form action="{{ url_for('search') }}" method="post" class="col-md-6 mx-auto">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search for products..." required>
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% if products %}
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 product-card">
+                    <div class="card-img-top-wrapper" style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                        {% if product.thumbnail %}
+                            <img src="{{ product.thumbnail }}" class="card-img-top" alt="{{ product.title }}" style="object-fit: contain; max-height: 100%; width: auto;">
+                        {% else %}
+                            <div class="text-center p-3">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-2">No image available</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" style="height: 3em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            {{ product.title }}
+                        </h5>
+                        <p class="card-text">
+                            <span class="h4 text-primary">{{ product.price }}</span><br>
+                            {% if product.rating %}
+                                <span class="text-warning">
+                                    <i class="fas fa-star"></i> {{ product.rating }}
+                                </span><br>
+                            {% endif %}
+                            {% if product.source %}
+                                <small class="text-muted">
+                                    <i class="fas fa-store"></i> {{ product.source }}
+                                </small>
+                            {% endif %}
+                        </p>
+                        {% if product.link %}
+                            <a href="{{ product.link }}" class="btn btn-primary w-100" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> View Deal
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center">
+            <p>No products found. Try a different search term.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

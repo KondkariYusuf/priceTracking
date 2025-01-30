@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-4 mb-4">Welcome to Price Comparison</h1>
+    <p class="lead">Find the best deals across multiple stores</p>
+    
+    <div class="mt-5">
+        <form action="{{ url_for('search') }}" method="post" class="col-md-6 mx-auto">
+            <div class="input-group mb-3">
+                <input type="text" name="query" class="form-control" placeholder="Search for products..." required>
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
