@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Finnhub Stock Search</h2>
+    
+    <div class="mb-4">
+        <div class="input-group">
+            <input type="text" id="stock-search" class="form-control" placeholder="Search for stocks...">
+            <button class="btn btn-primary" type="button" id="search-btn">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </div>
+
+    <div id="results-container" class="row"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBtn = document.getElementById('search-btn');
+    const searchInput = document.getElementById('stock-search');
+    const resultsContainer = document.getElementById('results-container');
+
+    searchBtn.addEventListener('click', searchStocks);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchStocks();
+        }
+    });
+
+    async function searchStocks() {
+        const query = searchInput.value.trim();
+        if (!query) return;
+
+        try {
+            resultsContainer.innerHTML = '<div class="col-12 text-center">Searching...</div>';
+            const response = await fetch(`/search-stocks?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            console.log('Response data:', data); // Debug log
+
+            if (response.ok) {
+                if (data.error) {
+                    displayError(data.error);
+                } else {
+                    displayResults(data);
+                }
+            } else {
+                displayError(`Server error: ${data.error || response.statusText}`);
+            }
+        } catch (error) {
+            displayError(`Network error: ${error.message}`);
+        }
+    }
+
+    function displayResults(stocks) {
+        console.log('Displaying results:', stocks); // Debug log
+        resultsContainer.innerHTML = '';
+        if (stocks.length === 0) {
+            resultsContainer.innerHTML = '<div class="col-12 text-center">No results found</div>';
+            return;
+        }
+
+        stocks.forEach(stock => {
+            const card = document.createElement('div');
+            card.className = 'col-md-4 mb-4';
+            card.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">${stock.name} (${stock.symbol})</h5>
+                        <p class="card-text">
+                            <strong>Price:</strong> $${stock.price ? stock.price.toFixed(2) : 'N/A'}<br>
+                            <strong>Change:</strong> 
+                            <span class="${stock.change >= 0 ? 'text-success' : 'text-danger'}">
+                                ${stock.change ? (stock.change >= 0 ? '+' : '') + stock.change.toFixed(2) : 'N/A'} 
+                                (${stock.percent_change ? stock.percent_change.toFixed(2) : 'N/A'}%)
+                            </span><br>
+                            <strong>Exchange:</strong> ${stock.exchange || 'N/A'}<br>
+                            <strong>Volume:</strong> ${stock.volume ? stock.volume.toLocaleString() : 'N/A'}<br>
+                            <strong>52 Week Range:</strong> ${stock.fifty_two_week ? `${stock.fifty_two_week.low} - ${stock.fifty_two_week.high}` : 'N/A'}
+                        </p>
+                    </div>
+                </div>
+            `;
+            resultsContainer.appendChild(card);
+        });
+    }
+
+    function displayError(message) {
+        resultsContainer.innerHTML = `
+            <div class="col-12 text-center text-danger">
+                ${message}
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}
